@@ -15,9 +15,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { CategoryModal } from '@/components/modals/CategoryModal';
+import type { Category, CreateCategoryData } from '@/types/products';
+import { useToast } from '@/hooks/use-toast';
 
 // Sample data - replace with real data from Supabase
-const sampleCategories = [
+const sampleCategories: Category[] = [
   {
     id: '1',
     name: 'Eletrônicos',
@@ -91,23 +94,13 @@ const sampleCategories = [
   }
 ];
 
-interface Category {
-  id: string;
-  name: string;
-  description?: string;
-  parent_id?: string;
-  color?: string;
-  icon?: string;
-  status: 'active' | 'inactive';
-  created_at: string;
-  updated_at: string;
-  children?: Category[];
-}
-
 export default function CategoriasPage() {
-  const [categories] = useState<Category[]>(sampleCategories);
+  const [categories, setCategories] = useState<Category[]>(sampleCategories);
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['1', '4']));
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const { toast } = useToast();
 
   const toggleExpanded = (categoryId: string) => {
     const newExpanded = new Set(expandedCategories);
@@ -120,8 +113,122 @@ export default function CategoriasPage() {
   };
 
   const handleDeleteCategory = async (categoryId: string) => {
-    // TODO: Implement delete functionality with Supabase
-    console.log('Delete category:', categoryId);
+    const categoryToDelete = findCategoryById(categories, categoryId);
+    if (!categoryToDelete) return;
+    
+    // Remove category from state
+    setCategories(prevCategories => 
+      removeCategoryFromTree(prevCategories, categoryId)
+    );
+    
+    toast({
+      title: "Categoria excluída",
+      description: `A categoria "${categoryToDelete.name}" foi removida com sucesso.`,
+    });
+  };
+
+  const handleSaveCategory = (data: CreateCategoryData) => {
+    if (editingCategory) {
+      // Update existing category
+      setCategories(prevCategories =>
+        updateCategoryInTree(prevCategories, editingCategory.id, data)
+      );
+      
+      toast({
+        title: "Categoria atualizada",
+        description: `A categoria "${data.name}" foi atualizada com sucesso.`,
+      });
+    } else {
+      // Create new category
+      const newCategory: Category = {
+        id: Date.now().toString(),
+        ...data,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        children: [],
+      };
+      
+      if (data.parent_id) {
+        // Add as subcategory
+        setCategories(prevCategories =>
+          addSubcategoryToTree(prevCategories, data.parent_id!, newCategory)
+        );
+      } else {
+        // Add as main category
+        setCategories(prev => [...prev, newCategory]);
+      }
+      
+      toast({
+        title: "Categoria criada",
+        description: `A categoria "${data.name}" foi criada com sucesso.`,
+      });
+    }
+    
+    setEditingCategory(null);
+    setIsModalOpen(false);
+  };
+
+  const handleEditCategory = (category: Category) => {
+    setEditingCategory(category);
+    setIsModalOpen(true);
+  };
+
+  // Helper functions
+  const findCategoryById = (cats: Category[], id: string): Category | null => {
+    for (const cat of cats) {
+      if (cat.id === id) return cat;
+      if (cat.children) {
+        const found = findCategoryById(cat.children, id);
+        if (found) return found;
+      }
+    }
+    return null;
+  };
+
+  const removeCategoryFromTree = (cats: Category[], id: string): Category[] => {
+    return cats
+      .filter(cat => cat.id !== id)
+      .map(cat => ({
+        ...cat,
+        children: cat.children ? removeCategoryFromTree(cat.children, id) : [],
+      }));
+  };
+
+  const updateCategoryInTree = (cats: Category[], id: string, data: CreateCategoryData): Category[] => {
+    return cats.map(cat => {
+      if (cat.id === id) {
+        return {
+          ...cat,
+          ...data,
+          updated_at: new Date().toISOString(),
+        };
+      }
+      if (cat.children) {
+        return {
+          ...cat,
+          children: updateCategoryInTree(cat.children, id, data),
+        };
+      }
+      return cat;
+    });
+  };
+
+  const addSubcategoryToTree = (cats: Category[], parentId: string, newCat: Category): Category[] => {
+    return cats.map(cat => {
+      if (cat.id === parentId) {
+        return {
+          ...cat,
+          children: [...(cat.children || []), newCat],
+        };
+      }
+      if (cat.children) {
+        return {
+          ...cat,
+          children: addSubcategoryToTree(cat.children, parentId, newCat),
+        };
+      }
+      return cat;
+    });
   };
 
   const renderCategory = (category: Category, level = 0) => {
@@ -169,7 +276,7 @@ export default function CategoriasPage() {
               </div>
               
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" onClick={() => handleEditCategory(category)}>
                   <Edit className="h-4 w-4" />
                 </Button>
                 
@@ -224,7 +331,12 @@ export default function CategoriasPage() {
             Organize seus produtos em categorias hierárquicas
           </p>
         </div>
-        <Button>
+        <Button
+          onClick={() => {
+            setEditingCategory(null);
+            setIsModalOpen(true);
+          }}
+        >
           <Plus className="h-4 w-4 mr-2" />
           Nova Categoria
         </Button>
@@ -324,6 +436,17 @@ export default function CategoriasPage() {
           </div>
         </CardContent>
       </Card>
+
+      <CategoryModal
+        open={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingCategory(null);
+        }}
+        onSave={handleSaveCategory}
+        category={editingCategory}
+        categories={categories}
+      />
     </div>
   );
 }

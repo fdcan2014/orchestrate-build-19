@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Package, AlertTriangle, TrendingUp, TrendingDown, ArrowUpDown, BarChart3 } from 'lucide-react';
+import { Search, Package, AlertTriangle, TrendingUp, TrendingDown, ArrowUpDown, BarChart3, Plus } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -22,6 +22,9 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { StockManager } from '@/components/pdv/StockManager';
+import { Product } from '@/types/pdv';
+import { useToast } from '@/hooks/use-toast';
 
 // Sample data - replace with real data from Supabase
 const sampleProducts = [
@@ -115,6 +118,34 @@ const sampleMovements = [
 export default function EstoquePage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStore, setSelectedStore] = useState<string>('all');
+  const [isStockManagerOpen, setIsStockManagerOpen] = useState(false);
+  const [products, setProducts] = useState<Product[]>(() => 
+    sampleProducts.map(p => ({
+      id: p.id,
+      name: p.name,
+      price: 0,
+      stock: p.stock_levels?.reduce((total, stock) => total + stock.quantity, 0) || 0,
+      category: p.category?.name || '',
+      image: '',
+      barcode: p.sku,
+      sku: p.sku,
+      type: 'simple' as const,
+      manage_stock: true,
+      min_stock: p.min_stock,
+    }))
+  );
+  const { toast } = useToast();
+
+  const handleStockUpdate = (productId: string, newStock: number) => {
+    setProducts(prev => 
+      prev.map(p => p.id === productId ? { ...p, stock: newStock } : p)
+    );
+    
+    toast({
+      title: "Estoque atualizado",
+      description: "O estoque do produto foi ajustado com sucesso.",
+    });
+  };
 
   const filteredProducts = sampleProducts.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -160,6 +191,10 @@ export default function EstoquePage() {
             Gerencie o estoque de todos os produtos em suas lojas
           </p>
         </div>
+        <Button onClick={() => setIsStockManagerOpen(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          Gerenciar Estoque
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -379,7 +414,12 @@ export default function EstoquePage() {
                         <div className="text-sm font-medium">
                           {totalStock} / {product.min_stock} un.
                         </div>
-                        <Button variant="outline" size="sm" className="mt-1">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="mt-1"
+                          onClick={() => setIsStockManagerOpen(true)}
+                        >
                           Gerenciar
                         </Button>
                       </div>
@@ -429,6 +469,13 @@ export default function EstoquePage() {
           </div>
         </CardContent>
       </Card>
+
+      <StockManager
+        isOpen={isStockManagerOpen}
+        onClose={() => setIsStockManagerOpen(false)}
+        products={products}
+        onStockUpdate={handleStockUpdate}
+      />
     </div>
   );
 }
