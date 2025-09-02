@@ -119,6 +119,7 @@ export default function EstoquePage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStore, setSelectedStore] = useState<string>('all');
   const [isStockManagerOpen, setIsStockManagerOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [products, setProducts] = useState<Product[]>(() => 
     sampleProducts.map(p => ({
       id: p.id,
@@ -329,7 +330,14 @@ export default function EstoquePage() {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <Button variant="ghost" size="sm">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => {
+                              setSelectedProduct(product);
+                              setIsStockManagerOpen(true);
+                            }}
+                          >
                             <Package className="h-4 w-4" />
                           </Button>
                         </TableCell>

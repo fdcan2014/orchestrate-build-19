@@ -27,23 +27,36 @@ interface StockManagerProps {
   onClose: () => void;
   products: Product[];
   onStockUpdate: (productId: string, newStock: number) => void;
+  selectedProduct?: Product | null;
 }
 
 export function StockManager({ 
   isOpen, 
   onClose, 
   products, 
-  onStockUpdate 
+  onStockUpdate,
+  selectedProduct 
 }: StockManagerProps) {
   const [activeTab, setActiveTab] = useState<'alerts' | 'movements' | 'inventory'>('alerts');
   const [stockAlerts, setStockAlerts] = useState<StockAlert[]>([]);
   const [stockMovements, setStockMovements] = useState<StockMovement[]>([]);
   const [inventoryMode, setInventoryMode] = useState(false);
   const [inventoryCounts, setInventoryCounts] = useState<{[key: string]: number}>({});
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedProductState, setSelectedProductState] = useState<Product | null>(null);
   const [adjustmentReason, setAdjustmentReason] = useState("");
   const [adjustmentQuantity, setAdjustmentQuantity] = useState(0);
   const { toast } = useToast();
+
+  // Atualizar produto selecionado quando a prop mudar
+  useEffect(() => {
+    if (selectedProduct) {
+      setSelectedProductState(selectedProduct);
+      // Se o usuário estiver na aba de alertas, mude para a aba de movimentações
+      if (activeTab === 'alerts') {
+        setActiveTab('movements');
+      }
+    }
+  }, [selectedProduct]);
 
   // Gerar alertas de estoque
   useEffect(() => {
@@ -85,7 +98,7 @@ export function StockManager({
   }, [products]);
 
   const handleStockAdjustment = () => {
-    if (!selectedProduct || adjustmentQuantity === 0) {
+    if (!localSelectedProduct || adjustmentQuantity === 0) {
       toast({
         title: "Dados inválidos",
         description: "Selecione um produto e informe a quantidade",
@@ -108,10 +121,10 @@ export function StockManager({
     // Registrar movimento
     const movement: StockMovement = {
       id: Date.now().toString(),
-      product_id: selectedProduct.id,
+      product_id: localSelectedProduct.id,
       type: 'adjustment',
       quantity: Math.abs(adjustmentQuantity),
-      previous_stock: selectedProduct.stock,
+      previous_stock: localSelectedProduct.stock,
       new_stock: newStock,
       reason: adjustmentReason,
       user_id: 'user_001',
@@ -120,16 +133,16 @@ export function StockManager({
     };
 
     setStockMovements(prev => [movement, ...prev]);
-    onStockUpdate(selectedProduct.id, newStock);
-    
-    setSelectedProduct(null);
-    setAdjustmentQuantity(0);
-    setAdjustmentReason("");
-    
-    toast({
-      title: "Estoque ajustado",
-      description: `${selectedProduct.name}: ${selectedProduct.stock} → ${newStock} unidades`,
-    });
+      onStockUpdate(localSelectedProduct.id, newStock);
+      
+      setLocalSelectedProduct(null);
+      setAdjustmentQuantity(0);
+      setAdjustmentReason("");
+      
+      toast({
+        title: "Estoque ajustado",
+        description: `${localSelectedProduct.name}: ${localSelectedProduct.stock} → ${newStock} unidades`,
+      });
   };
 
   const handleInventoryCount = (productId: string, actualCount: number) => {
@@ -260,14 +273,14 @@ export function StockManager({
               <div className="flex justify-between items-center">
                 <h3 className="font-semibold">Alertas de Estoque</h3>
                 <Button
-                  variant="outline"
-                  onClick={() => {
-                    setSelectedProduct(products[0] || null);
-                    setActiveTab('movements');
-                  }}
-                >
-                  Ajustar Estoque
-                </Button>
+            variant="outline"
+            onClick={() => {
+              setLocalSelectedProduct(products[0] || null);
+              setActiveTab('movements');
+            }}
+          >
+            Ajustar Estoque
+          </Button>
               </div>
 
               {stockAlerts.length === 0 ? (
@@ -304,18 +317,18 @@ export function StockManager({
                             </Badge>
                             
                             <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                const product = products.find(p => p.id === alert.product_id);
-                                if (product) {
-                                  setSelectedProduct(product);
-                                  setActiveTab('movements');
-                                }
-                              }}
-                            >
-                              Ajustar
-                            </Button>
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  const product = products.find(p => p.id === alert.product_id);
+                                  if (product) {
+                                    setLocalSelectedProduct(product);
+                                    setActiveTab('movements');
+                                  }
+                                }}
+                              >
+                                Ajustar
+                              </Button>
                           </div>
                         </div>
                       </CardContent>
@@ -343,10 +356,10 @@ export function StockManager({
                     <div>
                       <label className="text-sm font-medium">Produto</label>
                       <Select 
-                        value={selectedProduct?.id || ''} 
+                        value={localSelectedProduct?.id || ''} 
                         onValueChange={(value) => {
                           const product = products.find(p => p.id === value);
-                          setSelectedProduct(product || null);
+                          setLocalSelectedProduct(product || null);
                         }}
                       >
                         <SelectTrigger>
