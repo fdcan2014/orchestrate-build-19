@@ -110,7 +110,6 @@ All colors MUST be HSL. Beautiful gradients and professional styling.
     --shadow-card: 0 2px 12px -2px hsl(0 0% 0% / 0.15);
   }
 }
-}
 
 @layer components {
   .card-gradient {
