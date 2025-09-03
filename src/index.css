@@ -8,32 +8,32 @@ All colors MUST be HSL. Beautiful gradients and professional styling.
 
 @layer base {
   :root {
-    /* Maxton Theme - Inspired by the Reference */
-    --background: 234 35% 8%;
+    /* Maxton Dark Theme - Cores exatas da referência */
+    --background: 237 47% 10%; /* #0f1221 - Deep navy background */
     --foreground: 210 20% 98%;
     
-    /* Primary - Electric Blue */
-    --primary: 225 85% 55%;
+    /* Primary - Electric Blue/Cyan */
+    --primary: 195 100% 50%; /* Cyan vibrante */
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 225 100% 70%;
+    --primary-glow: 195 100% 70%;
     
-    /* Card - Dark Blue Cards like Maxton */
-    --card: 234 40% 12%;
+    /* Card - Dark navy cards */
+    --card: 237 45% 13%; /* #151729 - Card background */
     --card-foreground: 210 20% 98%;
     
-    --popover: 234 35% 15%;
+    --popover: 237 45% 15%;
     --popover-foreground: 210 20% 98%;
     
-    /* Secondary - Purple */
-    --secondary: 270 65% 55%;
+    /* Secondary - Purple vibrante */
+    --secondary: 270 70% 60%; /* Purple/Violet */
     --secondary-foreground: 0 0% 100%;
     
-    /* Muted - Soft Gray */
-    --muted: 234 30% 18%;
+    /* Muted - Soft navy */
+    --muted: 237 35% 18%;
     --muted-foreground: 230 15% 65%;
     
-    /* Accent - Teal/Cyan */
-    --accent: 180 70% 45%;
+    /* Accent - Pink/Magenta */
+    --accent: 330 85% 60%; /* Pink vibrante */
     --accent-foreground: 0 0% 100%;
     
     /* Destructive - Red */
@@ -41,69 +41,76 @@ All colors MUST be HSL. Beautiful gradients and professional styling.
     --destructive-foreground: 0 0% 100%;
     
     /* Borders & Inputs */
-    --border: 234 30% 20%;
-    --input: 234 30% 18%;
-    --ring: 225 85% 55%;
+    --border: 237 30% 20%;
+    --input: 237 35% 16%;
+    --ring: 195 100% 50%;
     
-    --radius: 0.75rem;
+    --radius: 1rem; /* Bordas mais arredondadas */
     
-    /* Sidebar specific */
-    --sidebar-background: 234 42% 10%;
-    --sidebar-foreground: 210 20% 90%;
-    --sidebar-primary: 225 85% 55%;
+    /* Sidebar - Deep navy */
+    --sidebar-background: 237 50% 8%; /* #0a0d1a - Sidebar mais escuro */
+    --sidebar-foreground: 210 20% 85%;
+    --sidebar-primary: 195 100% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 234 35% 15%;
+    --sidebar-accent: 237 40% 12%;
     --sidebar-accent-foreground: 210 20% 95%;
-    --sidebar-border: 234 30% 18%;
-    --sidebar-ring: 225 85% 55%;
+    --sidebar-border: 237 35% 15%;
+    --sidebar-ring: 195 100% 50%;
     
-    /* Chart Colors - Vibrant Maxton Palette */
-    --chart-1: 165 80% 45%; /* Turquoise */
-    --chart-2: 280 70% 50%; /* Purple */
-    --chart-3: 45 90% 55%;  /* Yellow */
-    --chart-4: 340 75% 55%; /* Pink */
-    --chart-5: 200 75% 50%; /* Sky Blue */
+    /* Chart Colors - Paleta vibrante do Maxton */
+    --chart-1: 195 100% 50%; /* Cyan */
+    --chart-2: 330 85% 60%;  /* Pink/Magenta */
+    --chart-3: 45 100% 55%;  /* Yellow/Gold */
+    --chart-4: 270 70% 60%;  /* Purple */
+    --chart-5: 150 70% 50%;  /* Green/Teal */
     
-    /* Custom Maxton Gradients & Colors */
-    --gradient-primary: linear-gradient(135deg, hsl(225 85% 55%), hsl(270 65% 55%));
-    --gradient-card: linear-gradient(145deg, hsl(234 40% 14%), hsl(234 40% 10%));
-    --gradient-success: linear-gradient(135deg, hsl(145 70% 45%), hsl(165 80% 45%));
-    --gradient-warning: linear-gradient(135deg, hsl(35 90% 55%), hsl(45 90% 55%));
-    --gradient-danger: linear-gradient(135deg, hsl(0 75% 50%), hsl(340 75% 55%));
-    --gradient-info: linear-gradient(135deg, hsl(200 75% 50%), hsl(225 85% 55%));
+    /* Gradientes Maxton */
+    --gradient-primary: linear-gradient(135deg, hsl(195 100% 50%), hsl(270 70% 60%));
+    --gradient-card: linear-gradient(145deg, hsl(237 45% 15%), hsl(237 45% 11%));
+    --gradient-success: linear-gradient(135deg, hsl(150 70% 50%), hsl(195 100% 50%));
+    --gradient-warning: linear-gradient(135deg, hsl(30 100% 55%), hsl(45 100% 55%));
+    --gradient-danger: linear-gradient(135deg, hsl(0 75% 50%), hsl(330 85% 60%));
+    --gradient-info: linear-gradient(135deg, hsl(195 100% 50%), hsl(220 90% 60%));
+    --gradient-purple: linear-gradient(135deg, hsl(270 70% 60%), hsl(330 85% 60%));
+    --gradient-cyan: linear-gradient(135deg, hsl(180 100% 45%), hsl(195 100% 50%));
     
-    /* Shadows */
-    --shadow-elegant: 0 10px 40px -10px hsl(225 85% 55% / 0.4);
-    --shadow-card: 0 4px 20px -4px hsl(0 0% 0% / 0.3);
-    --shadow-glow: 0 0 40px hsl(225 100% 70% / 0.3);
+    /* Shadows com glow effect */
+    --shadow-elegant: 0 10px 40px -10px hsl(195 100% 50% / 0.3);
+    --shadow-card: 0 4px 20px -4px hsl(0 0% 0% / 0.5);
+    --shadow-glow: 0 0 40px hsl(195 100% 50% / 0.2);
+    --shadow-purple-glow: 0 0 40px hsl(270 70% 60% / 0.3);
     
     /* Success, Warning, Info Colors */
-    --success: 145 70% 45%;
+    --success: 150 70% 50%;
     --success-foreground: 0 0% 100%;
-    --warning: 35 90% 55%;
+    --warning: 35 100% 55%;
     --warning-foreground: 0 0% 100%;
-    --info: 200 75% 50%;
+    --info: 195 100% 50%;
     --info-foreground: 0 0% 100%;
   }
 
   .light {
-    /* Light mode adjustments - keeping dark theme as default like Maxton */
-    --background: 210 25% 97%;
-    --foreground: 234 30% 13%;
+    /* Light mode - Mantendo o tema escuro como padrão */
+    --background: 210 25% 95%;
+    --foreground: 237 40% 13%;
     
     --card: 0 0% 100%;
-    --card-foreground: 234 30% 13%;
+    --card-foreground: 237 40% 13%;
     
     --popover: 0 0% 100%;
-    --popover-foreground: 234 30% 13%;
+    --popover-foreground: 237 40% 13%;
+    
+    --primary: 195 90% 45%;
+    --secondary: 270 60% 55%;
+    --accent: 330 75% 55%;
     
     --muted: 210 20% 94%;
-    --muted-foreground: 234 20% 40%;
+    --muted-foreground: 237 20% 40%;
     
     --border: 210 20% 85%;
     --input: 210 20% 90%;
     
-    --sidebar-background: 234 42% 10%;
+    --sidebar-background: 237 45% 10%;
     --sidebar-foreground: 210 20% 90%;
     
     --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(210 20% 98%));
@@ -143,6 +150,22 @@ All colors MUST be HSL. Beautiful gradients and professional styling.
   
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: hsl(var(--primary) / 0.5);
+  }
+  
+  /* Maxton Animations */
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-fade-in {
+    animation: fade-in 0.5s ease-out;
   }
 }
 

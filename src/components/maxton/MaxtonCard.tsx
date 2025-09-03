@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { TrendingUp, TrendingDown } from "lucide-react";
 
 interface MaxtonCardProps {
   title?: string;
@@ -12,6 +13,8 @@ interface MaxtonCardProps {
   children?: ReactNode;
   className?: string;
   variant?: 'default' | 'gradient' | 'outlined';
+  gradientFrom?: string;
+  gradientTo?: string;
 }
 
 export function MaxtonCard({ 
@@ -23,30 +26,35 @@ export function MaxtonCard({
   changeType = 'neutral',
   children, 
   className,
-  variant = 'default'
+  variant = 'default',
+  gradientFrom,
+  gradientTo
 }: MaxtonCardProps) {
   const getChangeColor = () => {
     switch (changeType) {
-      case 'positive': return 'text-green-600';
-      case 'negative': return 'text-red-600';
-      default: return 'text-gray-500';
+      case 'positive': return 'text-emerald-400';
+      case 'negative': return 'text-rose-400';
+      default: return 'text-muted-foreground';
     }
   };
 
   const getVariantStyles = () => {
     switch (variant) {
       case 'gradient':
-        return 'bg-gradient-to-br from-white to-gray-50 border-gray-200 shadow-md hover:shadow-lg';
+        if (gradientFrom && gradientTo) {
+          return `bg-gradient-to-br ${gradientFrom} ${gradientTo} border-0 shadow-xl`;
+        }
+        return 'bg-gradient-to-br from-card via-card to-muted/20 border-0 shadow-xl';
       case 'outlined':
-        return 'bg-white border-2 border-gray-200 hover:border-blue-300';
+        return 'bg-card border-2 border-border hover:border-primary';
       default:
-        return 'bg-white border border-gray-200 shadow-sm hover:shadow-md';
+        return 'bg-card border border-border shadow-lg';
     }
   };
 
   return (
     <Card className={cn(
-      "transition-all duration-200 hover:scale-[1.02]",
+      "transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl rounded-2xl overflow-hidden",
       getVariantStyles(),
       className
     )}>
@@ -54,14 +62,14 @@ export function MaxtonCard({
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           {title && (
             <div>
-              <h3 className="text-sm font-medium text-gray-600">{title}</h3>
+              <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
               {subtitle && (
-                <p className="text-xs text-gray-500 mt-1">{subtitle}</p>
+                <p className="text-xs text-muted-foreground/70 mt-1">{subtitle}</p>
               )}
             </div>
           )}
           {icon && (
-            <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-md">
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 text-primary shadow-glow">
               {icon}
             </div>
           )}
@@ -70,12 +78,17 @@ export function MaxtonCard({
       
       <CardContent className="pt-0">
         {value && (
-          <div className="space-y-1">
-            <div className="text-2xl font-bold text-gray-900">{value}</div>
+          <div className="space-y-2">
+            <div className="text-3xl font-bold text-foreground">{value}</div>
             {change && (
-              <p className={cn("text-xs font-medium", getChangeColor())}>
-                {change}
-              </p>
+              <div className={cn("flex items-center gap-1 text-xs font-medium", getChangeColor())}>
+                {changeType === 'positive' ? (
+                  <TrendingUp className="w-3 h-3" />
+                ) : changeType === 'negative' ? (
+                  <TrendingDown className="w-3 h-3" />
+                ) : null}
+                <span>{change}</span>
+              </div>
             )}
           </div>
         )}
