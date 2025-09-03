@@ -42,7 +42,7 @@ export function StockManager({
   const [stockMovements, setStockMovements] = useState<StockMovement[]>([]);
   const [inventoryMode, setInventoryMode] = useState(false);
   const [inventoryCounts, setInventoryCounts] = useState<{[key: string]: number}>({});
-  const [selectedProductState, setSelectedProductState] = useState<Product | null>(null);
+  const [localSelectedProduct, setLocalSelectedProduct] = useState<Product | null>(null);
   const [adjustmentReason, setAdjustmentReason] = useState("");
   const [adjustmentQuantity, setAdjustmentQuantity] = useState(0);
   const { toast } = useToast();
@@ -50,7 +50,7 @@ export function StockManager({
   // Atualizar produto selecionado quando a prop mudar
   useEffect(() => {
     if (selectedProduct) {
-      setSelectedProductState(selectedProduct);
+      setLocalSelectedProduct(selectedProduct);
       // Se o usuário estiver na aba de alertas, mude para a aba de movimentações
       if (activeTab === 'alerts') {
         setActiveTab('movements');
@@ -116,7 +116,7 @@ export function StockManager({
       return;
     }
 
-    const newStock = Math.max(0, selectedProduct.stock + adjustmentQuantity);
+    const newStock = Math.max(0, localSelectedProduct.stock + adjustmentQuantity);
     
     // Registrar movimento
     const movement: StockMovement = {
@@ -388,7 +388,7 @@ export function StockManager({
                     <div className="flex items-end">
                       <Button 
                         onClick={handleStockAdjustment}
-                        disabled={!selectedProduct || adjustmentQuantity === 0}
+                        disabled={!localSelectedProduct || adjustmentQuantity === 0}
                         className="w-full"
                       >
                         Ajustar

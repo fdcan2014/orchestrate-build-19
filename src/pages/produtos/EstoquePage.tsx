@@ -334,7 +334,20 @@ export default function EstoquePage() {
                             variant="ghost" 
                             size="sm"
                             onClick={() => {
-                              setSelectedProduct(product);
+                              const productAsProduct: Product = {
+                                id: product.id,
+                                name: product.name,
+                                price: 0,
+                                stock: product.stock_levels?.reduce((total, stock) => total + stock.quantity, 0) || 0,
+                                category: product.category?.name || '',
+                                image: '',
+                                barcode: product.sku,
+                                sku: product.sku,
+                                type: 'simple' as const,
+                                manage_stock: true,
+                                min_stock: product.min_stock,
+                              };
+                              setSelectedProduct(productAsProduct);
                               setIsStockManagerOpen(true);
                             }}
                           >
