@@ -116,20 +116,20 @@ export function MaxtonSidebar({ isCollapsed, onToggle }: SidebarProps) {
   };
 
   return (
-    <div className={cn(
-      "maxton-sidebar flex flex-col h-full bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white transition-all duration-300 ease-in-out",
+    <aside className={cn(
+      "h-screen flex flex-col bg-sidebar-background text-sidebar-foreground transition-all duration-300 ease-in-out overflow-hidden",
       isCollapsed ? "w-16" : "w-64"
     )}>
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-slate-700/50">
+      <div className="flex items-center justify-between p-4 border-b border-sidebar-border bg-gradient-to-r from-primary/10 to-secondary/10">
         <div className={cn("flex items-center gap-3", isCollapsed && "justify-center")}>
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">
-            <Home className="w-5 h-5 text-white" />
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-glow">
+            <Home className="w-5 h-5 text-primary-foreground" />
           </div>
           {!isCollapsed && (
             <div>
-              <h1 className="font-bold text-lg text-white">Maxton</h1>
-              <p className="text-xs text-slate-300">Admin Dashboard</p>
+              <h1 className="font-bold text-lg bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Maxton</h1>
+              <p className="text-xs text-muted-foreground">Admin Dashboard</p>
             </div>
           )}
         </div>
@@ -138,14 +138,14 @@ export function MaxtonSidebar({ isCollapsed, onToggle }: SidebarProps) {
           variant="ghost"
           size="sm"
           onClick={onToggle}
-          className="text-slate-300 hover:text-white hover:bg-slate-700/50 p-1.5"
+          className="text-muted-foreground hover:text-foreground hover:bg-accent p-1.5"
         >
           {isCollapsed ? <Menu className="h-4 w-4" /> : <X className="h-4 w-4" />}
         </Button>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
+      {/* Navigation - com rolagem independente */}
+      <nav className="flex-1 p-2 space-y-1 overflow-y-auto custom-scrollbar">
         {menuItems.map((item) => (
           <div key={item.title}>
             {item.items ? (
@@ -153,15 +153,22 @@ export function MaxtonSidebar({ isCollapsed, onToggle }: SidebarProps) {
                 <button
                   onClick={() => toggleGroup(item.title)}
                   className={cn(
-                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all duration-200",
-                    "hover:bg-slate-700/50 hover:text-white",
+                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all duration-200",
+                    "hover:bg-accent hover:text-accent-foreground group",
                     isGroupActive(item.items) 
-                      ? "bg-gradient-to-r from-blue-600/20 to-blue-500/10 text-blue-300 border-r-2 border-blue-400" 
-                      : "text-slate-300",
+                      ? "bg-gradient-to-r from-primary/20 to-secondary/10 text-primary border-l-2 border-primary" 
+                      : "text-muted-foreground",
                     isCollapsed && "justify-center"
                   )}
                 >
-                  <item.icon className="w-5 h-5 flex-shrink-0" />
+                  <div className={cn(
+                    "p-1.5 rounded-lg transition-all duration-200",
+                    isGroupActive(item.items) 
+                      ? "bg-gradient-to-br from-primary to-secondary text-primary-foreground shadow-glow" 
+                      : "group-hover:bg-muted"
+                  )}>
+                    <item.icon className="w-4 h-4" />
+                  </div>
                   {!isCollapsed && (
                     <>
                       <span className="flex-1 font-medium">{item.title}</span>
@@ -174,20 +181,23 @@ export function MaxtonSidebar({ isCollapsed, onToggle }: SidebarProps) {
                 </button>
                 
                 {!isCollapsed && expandedGroups.includes(item.title) && (
-                  <div className="ml-6 mt-1 space-y-1 border-l border-slate-700/50 pl-4">
+                  <div className="ml-6 mt-1 space-y-0.5 border-l-2 border-border pl-4 animate-fade-in">
                     {item.items.map((subItem) => (
                       <NavLink
                         key={subItem.url}
                         to={subItem.url}
                         className={({ isActive }) => cn(
-                          "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-all duration-200",
-                          "hover:bg-slate-700/30 hover:text-white",
+                          "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200",
+                          "hover:bg-accent hover:text-accent-foreground",
                           isActive 
-                            ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg" 
-                            : "text-slate-400"
+                            ? "bg-gradient-to-r from-primary to-secondary text-primary-foreground shadow-glow" 
+                            : "text-muted-foreground"
                         )}
                       >
-                        <div className="w-2 h-2 rounded-full bg-current opacity-60" />
+                        <div className={cn(
+                          "w-1.5 h-1.5 rounded-full transition-all duration-200",
+                          isActive ? "bg-primary-foreground shadow-glow" : "bg-muted-foreground"
+                        )} />
                         <span>{subItem.title}</span>
                       </NavLink>
                     ))}
@@ -198,16 +208,27 @@ export function MaxtonSidebar({ isCollapsed, onToggle }: SidebarProps) {
               <NavLink
                 to={item.url!}
                 className={({ isActive }) => cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
-                  "hover:bg-slate-700/50 hover:text-white",
+                  "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group",
+                  "hover:bg-accent hover:text-accent-foreground",
                   isActive 
-                    ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg" 
-                    : "text-slate-300",
+                    ? "bg-gradient-to-r from-primary to-secondary text-primary-foreground shadow-glow" 
+                    : "text-muted-foreground",
                   isCollapsed && "justify-center"
                 )}
               >
-                <item.icon className="w-5 h-5 flex-shrink-0" />
-                {!isCollapsed && <span className="font-medium">{item.title}</span>}
+                {({ isActive }) => (
+                  <>
+                    <div className={cn(
+                      "p-1.5 rounded-lg transition-all duration-200",
+                      isActive 
+                        ? "bg-primary-foreground/20" 
+                        : "group-hover:bg-muted"
+                    )}>
+                      <item.icon className="w-4 h-4" />
+                    </div>
+                    {!isCollapsed && <span className="font-medium">{item.title}</span>}
+                  </>
+                )}
               </NavLink>
             )}
           </div>
@@ -216,18 +237,18 @@ export function MaxtonSidebar({ isCollapsed, onToggle }: SidebarProps) {
 
       {/* Footer */}
       {!isCollapsed && (
-        <div className="p-4 border-t border-slate-700/50">
-          <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-800/50">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-              <User className="w-4 h-4 text-white" />
+        <div className="p-4 border-t border-sidebar-border bg-gradient-to-r from-primary/5 to-secondary/5">
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-card">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-glow">
+              <User className="w-4 h-4 text-primary-foreground" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white truncate">Admin User</p>
-              <p className="text-xs text-slate-400 truncate">admin@maxton.com</p>
+              <p className="text-sm font-medium text-foreground truncate">Admin User</p>
+              <p className="text-xs text-muted-foreground truncate">admin@maxton.com</p>
             </div>
           </div>
         </div>
       )}
-    </div>
+    </aside>
   );
 }
