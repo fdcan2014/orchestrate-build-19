@@ -26,6 +26,8 @@ import { AdminProvider } from "./contexts/AdminContext";
 import { AuthPage } from "./pages/auth/AuthPage";
 import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import { MaxtonLayout } from "./components/layout/MaxtonLayout";
+import MaxtonDashboardPage from "./pages/MaxtonDashboardPage";
 
 const queryClient = new QueryClient();
 
@@ -40,29 +42,29 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<AuthPage />} />
-              <Route path="/admin" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
-              <Route path="/dashboard" element={<AdminLayout><Dashboard /></AdminLayout>} />
-              <Route path="/lojas" element={<AdminLayout><LojasPage /></AdminLayout>} />
-              <Route path="/lojas/nova" element={<AdminLayout><NovaLoja /></AdminLayout>} />
-              <Route path="/lojas/:id" element={<AdminLayout><LojaDetalhes /></AdminLayout>} />
-              <Route path="/usuarios" element={<AdminLayout><UsuariosPage /></AdminLayout>} />
-              <Route path="/usuarios/permissoes" element={<AdminLayout><div>Permissões</div></AdminLayout>} />
-              <Route path="/produtos" element={<AdminLayout><ProdutosPage /></AdminLayout>} />
-              <Route path="/produtos/categorias" element={<AdminLayout><CategoriasPage /></AdminLayout>} />
-              <Route path="/produtos/estoque" element={<AdminLayout><EstoquePage /></AdminLayout>} />
-              <Route path="/vendas/pdv" element={<AdminLayout><PdvPage /></AdminLayout>} />
-              <Route path="/vendas/historico" element={<AdminLayout><VendasPage /></AdminLayout>} />
-              <Route path="/vendas/comissoes" element={<AdminLayout><div>Comissões</div></AdminLayout>} />
-              <Route path="/suporte/dashboard" element={<AdminLayout><SuporteDashboard /></AdminLayout>} />
-              <Route path="/suporte/ordens" element={<AdminLayout><OrdensServico /></AdminLayout>} />
-              <Route path="/suporte/nova" element={<AdminLayout><NovaOS /></AdminLayout>} />
-              <Route path="/suporte/clientes" element={<AdminLayout><ClientesSuporte /></AdminLayout>} />
-              <Route path="/suporte/pecas" element={<AdminLayout><PecasSuporte /></AdminLayout>} />
-              <Route path="/suporte/relatorios" element={<AdminLayout><RelatoriosSuporte /></AdminLayout>} />
-              <Route path="/relatorios/financeiro" element={<AdminLayout><div>Relatório Financeiro</div></AdminLayout>} />
-              <Route path="/relatorios/vendas" element={<AdminLayout><div>Relatório de Vendas</div></AdminLayout>} />
-              <Route path="/relatorios/produtos" element={<AdminLayout><div>Relatório de Produtos</div></AdminLayout>} />
-              <Route path="/configuracoes" element={<AdminLayout><div>Configurações</div></AdminLayout>} />
+              <Route path="/admin" element={<MaxtonLayout><AdminDashboard /></MaxtonLayout>} />
+              <Route path="/dashboard" element={<MaxtonLayout><MaxtonDashboardPage /></MaxtonLayout>} />
+              <Route path="/lojas" element={<MaxtonLayout><LojasPage /></MaxtonLayout>} />
+              <Route path="/lojas/nova" element={<MaxtonLayout><NovaLoja /></MaxtonLayout>} />
+              <Route path="/lojas/:id" element={<MaxtonLayout><LojaDetalhes /></MaxtonLayout>} />
+              <Route path="/usuarios" element={<MaxtonLayout><UsuariosPage /></MaxtonLayout>} />
+              <Route path="/usuarios/permissoes" element={<MaxtonLayout><div>Permissões</div></MaxtonLayout>} />
+              <Route path="/produtos" element={<MaxtonLayout><ProdutosPage /></MaxtonLayout>} />
+              <Route path="/produtos/categorias" element={<MaxtonLayout><CategoriasPage /></MaxtonLayout>} />
+              <Route path="/produtos/estoque" element={<MaxtonLayout><EstoquePage /></MaxtonLayout>} />
+              <Route path="/vendas/pdv" element={<MaxtonLayout><PdvPage /></MaxtonLayout>} />
+              <Route path="/vendas/historico" element={<MaxtonLayout><VendasPage /></MaxtonLayout>} />
+              <Route path="/vendas/comissoes" element={<MaxtonLayout><div>Comissões</div></MaxtonLayout>} />
+              <Route path="/suporte/dashboard" element={<MaxtonLayout><SuporteDashboard /></MaxtonLayout>} />
+              <Route path="/suporte/ordens" element={<MaxtonLayout><OrdensServico /></MaxtonLayout>} />
+              <Route path="/suporte/nova" element={<MaxtonLayout><NovaOS /></MaxtonLayout>} />
+              <Route path="/suporte/clientes" element={<MaxtonLayout><ClientesSuporte /></MaxtonLayout>} />
+              <Route path="/suporte/pecas" element={<MaxtonLayout><PecasSuporte /></MaxtonLayout>} />
+              <Route path="/suporte/relatorios" element={<MaxtonLayout><RelatoriosSuporte /></MaxtonLayout>} />
+              <Route path="/relatorios/financeiro" element={<MaxtonLayout><div>Relatório Financeiro</div></MaxtonLayout>} />
+              <Route path="/relatorios/vendas" element={<MaxtonLayout><div>Relatório de Vendas</div></MaxtonLayout>} />
+              <Route path="/relatorios/produtos" element={<MaxtonLayout><div>Relatório de Produtos</div></MaxtonLayout>} />
+              <Route path="/configuracoes" element={<MaxtonLayout><div>Configurações</div></MaxtonLayout>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

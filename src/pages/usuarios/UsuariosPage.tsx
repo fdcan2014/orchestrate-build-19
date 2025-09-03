@@ -20,6 +20,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { MaxtonPageHeader } from "@/components/maxton/MaxtonPageHeader";
+import { MaxtonCard } from "@/components/maxton/MaxtonCard";
 
 const usuarios = [
   {
@@ -98,95 +100,76 @@ export default function UsuariosPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Usuários</h1>
-          <p className="text-muted-foreground">
-            Gerencie usuários e permissões do sistema
-          </p>
-        </div>
-        <Button className="btn-primary-gradient">
-          <Plus className="w-4 h-4 mr-2" />
-          Novo Usuário
-        </Button>
-      </div>
+      <MaxtonPageHeader
+        title="Usuários"
+        subtitle="Gerencie usuários e permissões do sistema"
+        breadcrumbs={[
+          { label: "Usuários" }
+        ]}
+        actions={
+          <Button className="maxton-button-primary">
+            <Plus className="w-4 h-4 mr-2" />
+            Novo Usuário
+          </Button>
+        }
+      />
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card className="card-gradient">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Usuários</CardTitle>
-            <User className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">4</div>
-            <p className="text-xs text-muted-foreground">
-              3 ativos, 1 inativo
-            </p>
-          </CardContent>
-        </Card>
+        <MaxtonCard
+          title="Total Usuários"
+          value="4"
+          change="3 ativos, 1 inativo"
+          icon={<User className="h-5 w-5" />}
+          variant="gradient"
+        />
         
-        <Card className="card-gradient">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Super Admins</CardTitle>
-            <Crown className="h-4 w-4 text-yellow-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">1</div>
-            <p className="text-xs text-muted-foreground">
-              Acesso total
-            </p>
-          </CardContent>
-        </Card>
+        <MaxtonCard
+          title="Super Admins"
+          value="1"
+          change="Acesso total"
+          icon={<Crown className="h-5 w-5" />}
+          variant="gradient"
+        />
 
-        <Card className="card-gradient">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Admins</CardTitle>
-            <Shield className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">1</div>
-            <p className="text-xs text-muted-foreground">
-              Gestores de loja
-            </p>
-          </CardContent>
-        </Card>
+        <MaxtonCard
+          title="Admins"
+          value="1"
+          change="Gestores de loja"
+          icon={<Shield className="h-5 w-5" />}
+          variant="gradient"
+        />
 
-        <Card className="card-gradient">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Usuários</CardTitle>
-            <User className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">2</div>
-            <p className="text-xs text-muted-foreground">
-              Operacionais
-            </p>
-          </CardContent>
-        </Card>
+        <MaxtonCard
+          title="Usuários"
+          value="2"
+          change="Operacionais"
+          icon={<User className="h-5 w-5" />}
+          variant="gradient"
+        />
       </div>
 
       {/* Filters */}
-      <Card className="card-gradient">
+      <Card className="maxton-card">
         <CardHeader>
-          <CardTitle>Filtros</CardTitle>
+          <CardTitle className="maxton-heading-3">Filtros</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               <Input
                 placeholder="Buscar usuários..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 maxton-input"
               />
             </div>
             <Select value={filterRole} onValueChange={setFilterRole}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-40 maxton-input">
                 <SelectValue placeholder="Função" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white border border-gray-200">
                 <SelectItem value="all">Todas</SelectItem>
                 <SelectItem value="super_admin">Super Admin</SelectItem>
                 <SelectItem value="admin">Admin</SelectItem>
@@ -194,10 +177,10 @@ export default function UsuariosPage() {
               </SelectContent>
             </Select>
             <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className="w-32">
+              <SelectTrigger className="w-32 maxton-input">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white border border-gray-200">
                 <SelectItem value="all">Todos</SelectItem>
                 <SelectItem value="ativo">Ativo</SelectItem>
                 <SelectItem value="inativo">Inativo</SelectItem>
@@ -208,23 +191,23 @@ export default function UsuariosPage() {
       </Card>
 
       {/* Users Table */}
-      <Card className="card-gradient">
+      <Card className="maxton-card">
         <CardHeader>
-          <CardTitle>Lista de Usuários</CardTitle>
-          <CardDescription>
+          <CardTitle className="maxton-heading-2">Lista de Usuários</CardTitle>
+          <CardDescription className="maxton-text-body">
             Gerencie todos os usuários do sistema
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Usuário</TableHead>
-                <TableHead>Função</TableHead>
-                <TableHead>Loja</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Último Login</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
+              <TableRow className="bg-gray-50/50">
+                <TableHead className="text-gray-700 font-semibold">Usuário</TableHead>
+                <TableHead className="text-gray-700 font-semibold">Função</TableHead>
+                <TableHead className="text-gray-700 font-semibold">Loja</TableHead>
+                <TableHead className="text-gray-700 font-semibold">Status</TableHead>
+                <TableHead className="text-gray-700 font-semibold">Último Login</TableHead>
+                <TableHead className="text-right text-gray-700 font-semibold">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -232,44 +215,41 @@ export default function UsuariosPage() {
                 const RoleIcon = roleIcons[usuario.role as keyof typeof roleIcons];
                 
                 return (
-                  <TableRow key={usuario.id}>
+                  <TableRow key={usuario.id} className="hover:bg-gray-50/50 transition-colors">
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <Avatar className="h-9 w-9">
-                          <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white font-medium">
                             {usuario.initials}
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <div className="font-medium">{usuario.nome}</div>
-                          <div className="text-sm text-muted-foreground">{usuario.email}</div>
+                          <div className="font-medium text-gray-900">{usuario.nome}</div>
+                          <div className="text-sm text-gray-500">{usuario.email}</div>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <RoleIcon className="w-4 h-4" />
-                        <Badge 
-                          variant="secondary" 
-                          className={roleColors[usuario.role as keyof typeof roleColors]}
-                        >
+                        <RoleIcon className="w-4 h-4 text-gray-600" />
+                        <Badge className={roleColors[usuario.role as keyof typeof roleColors]}>
                           {roleLabels[usuario.role as keyof typeof roleLabels]}
                         </Badge>
                       </div>
                     </TableCell>
-                    <TableCell>{usuario.loja}</TableCell>
+                    <TableCell className="text-gray-700">{usuario.loja}</TableCell>
                     <TableCell>
-                      <Badge variant={usuario.status === "ativo" ? "default" : "secondary"}>
+                      <Badge className={usuario.status === "ativo" ? "maxton-badge-success" : "maxton-badge-warning"}>
                         {usuario.status}
                       </Badge>
                     </TableCell>
-                    <TableCell>{new Date(usuario.ultimoLogin).toLocaleDateString()}</TableCell>
+                    <TableCell className="text-gray-600">{new Date(usuario.ultimoLogin).toLocaleDateString()}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" className="text-gray-600 hover:text-gray-700 hover:bg-gray-50">
                           <Edit className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                        <Button variant="ghost" size="icon" className="text-red-600 hover:text-red-700 hover:bg-red-50">
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>

@@ -12,6 +12,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import LojaForm from "@/components/forms/LojaForm";
 import BulkActions from "@/components/advanced/BulkActions";
 import AdvancedFilters from "@/components/advanced/AdvancedFilters";
+import { MaxtonPageHeader } from "@/components/maxton/MaxtonPageHeader";
+import { MaxtonCard } from "@/components/maxton/MaxtonCard";
 import { useStores, type Store } from "@/hooks/useStores";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -108,110 +110,65 @@ export default function LojasPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Gestão de Lojas</h1>
-          <p className="text-muted-foreground">Gerencie todas as lojas da sua rede</p>
-        </div>
-        <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-          <DialogTrigger asChild>
-            <Button className="flex items-center space-x-2">
-              <Plus className="w-4 h-4" />
-              <span>Nova Loja</span>
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Criar Nova Loja</DialogTitle>
-            </DialogHeader>
-            <LojaForm 
-              onSubmit={handleCreateLoja}
-              onCancel={() => setIsCreateOpen(false)}
-            />
-          </DialogContent>
-        </Dialog>
-      </div>
+      <MaxtonPageHeader
+        title="Gestão de Lojas"
+        subtitle="Gerencie todas as lojas da sua rede"
+        breadcrumbs={[
+          { label: "Lojas" }
+        ]}
+        actions={
+          <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+            <DialogTrigger asChild>
+              <Button className="maxton-button-primary">
+                <Plus className="w-4 h-4 mr-2" />
+                Nova Loja
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Criar Nova Loja</DialogTitle>
+              </DialogHeader>
+              <LojaForm 
+                onSubmit={handleCreateLoja}
+                onCancel={() => setIsCreateOpen(false)}
+              />
+            </DialogContent>
+          </Dialog>
+        }
+      />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total de Lojas</CardTitle>
-            <StoreIcon className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <Skeleton className="h-8 w-16" />
-            ) : (
-              <>
-                <div className="text-2xl font-bold">{stores.length}</div>
-                <p className="text-xs text-muted-foreground">
-                  {stores.filter(l => l.status === "active").length} ativas, {stores.filter(l => l.status === "inactive").length} inativas
-                </p>
-              </>
-            )}
-          </CardContent>
-        </Card>
+        <MaxtonCard
+          title="Total de Lojas"
+          value={loading ? "..." : stores.length.toString()}
+          change={loading ? "" : `${stores.filter(l => l.status === "active").length} ativas, ${stores.filter(l => l.status === "inactive").length} inativas`}
+          icon={<StoreIcon className="h-5 w-5" />}
+          variant="gradient"
+        />
         
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Lojas Ativas</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <Skeleton className="h-8 w-16" />
-            ) : (
-              <>
-                <div className="text-2xl font-bold">{stores.filter(l => l.status === "active").length}</div>
-                <p className="text-xs text-muted-foreground">
-                  Em funcionamento
-                </p>
-              </>
-            )}
-          </CardContent>
-        </Card>
+        <MaxtonCard
+          title="Lojas Ativas"
+          value={loading ? "..." : stores.filter(l => l.status === "active").length.toString()}
+          change="Em funcionamento"
+          icon={<TrendingUp className="h-5 w-5" />}
+          variant="gradient"
+        />
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Criadas Hoje</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <Skeleton className="h-8 w-16" />
-            ) : (
-              <>
-                <div className="text-2xl font-bold">
-                  {stores.filter(l => new Date(l.created_at).toDateString() === new Date().toDateString()).length}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Novas lojas hoje
-                </p>
-              </>
-            )}
-          </CardContent>
-        </Card>
+        <MaxtonCard
+          title="Criadas Hoje"
+          value={loading ? "..." : stores.filter(l => new Date(l.created_at).toDateString() === new Date().toDateString()).length.toString()}
+          change="Novas lojas hoje"
+          icon={<Users className="h-5 w-5" />}
+          variant="gradient"
+        />
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Última Criada</CardTitle>
-            <Award className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <Skeleton className="h-8 w-24" />
-            ) : (
-              <>
-                <div className="text-2xl font-bold text-xs">
-                  {stores.length > 0 ? stores[0]?.name : 'Nenhuma'}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Mais recente
-                </p>
-              </>
-            )}
-          </CardContent>
-        </Card>
+        <MaxtonCard
+          title="Última Criada"
+          value={loading ? "..." : (stores.length > 0 ? stores[0]?.name : 'Nenhuma')}
+          change="Mais recente"
+          icon={<Award className="h-5 w-5" />}
+          variant="gradient"
+        />
       </div>
 
       <AdvancedFilters 
@@ -226,15 +183,15 @@ export default function LojasPage() {
             placeholder="Buscar lojas..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="pl-10 maxton-input"
           />
         </div>
       </div>
 
-      <Card>
+      <Card className="maxton-card">
         <CardHeader>
-          <CardTitle>Lista de Lojas ({filteredLojas.length})</CardTitle>
-          <CardDescription>Visualize e gerencie todas as lojas da sua rede</CardDescription>
+          <CardTitle className="maxton-heading-2">Lista de Lojas ({filteredLojas.length})</CardTitle>
+          <CardDescription className="maxton-text-body">Visualize e gerencie todas as lojas da sua rede</CardDescription>
         </CardHeader>
         
         <BulkActions
@@ -268,63 +225,63 @@ export default function LojasPage() {
                       onCheckedChange={handleSelectAll}
                     />
                   </TableHead>
-                  <TableHead>Loja</TableHead>
-                  <TableHead>Endereço</TableHead>
-                  <TableHead>Contato</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Criada em</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
+                  <TableHead className="text-gray-700 font-semibold">Loja</TableHead>
+                  <TableHead className="text-gray-700 font-semibold">Endereço</TableHead>
+                  <TableHead className="text-gray-700 font-semibold">Contato</TableHead>
+                  <TableHead className="text-gray-700 font-semibold">Status</TableHead>
+                  <TableHead className="text-gray-700 font-semibold">Criada em</TableHead>
+                  <TableHead className="text-right text-gray-700 font-semibold">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredLojas.map((loja) => (
-                  <TableRow key={loja.id} className={selectedLojas.includes(loja.id) ? "bg-muted/50" : ""}>
+                  <TableRow key={loja.id} className={`hover:bg-gray-50/50 transition-colors ${selectedLojas.includes(loja.id) ? "bg-blue-50/50" : ""}`}>
                     <TableCell>
                       <Checkbox
                         checked={selectedLojas.includes(loja.id)}
                         onCheckedChange={(checked) => handleSelectLoja(loja.id, checked as boolean)}
                       />
                     </TableCell>
-                    <TableCell className="font-medium">{loja.name}</TableCell>
+                    <TableCell className="font-medium text-gray-900">{loja.name}</TableCell>
                     <TableCell>
-                      <div className="flex items-center text-sm text-muted-foreground">
+                      <div className="flex items-center text-sm text-gray-600">
                         <MapPin className="w-4 h-4 mr-1" />
                         {loja.address}
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="space-y-1">
-                        <div className="flex items-center text-sm">
+                        <div className="flex items-center text-sm text-gray-700">
                           <Phone className="w-4 h-4 mr-1" />
                           {loja.phone}
                         </div>
-                        <div className="flex items-center text-sm text-muted-foreground">
+                        <div className="flex items-center text-sm text-gray-500">
                           <Mail className="w-4 h-4 mr-1" />
                           {loja.email}
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={loja.status === "active" ? "default" : "secondary"}>
+                      <Badge className={loja.status === "active" ? "maxton-badge-success" : "maxton-badge-warning"}>
                         {loja.status === "active" ? "Ativa" : "Inativa"}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
+                    <TableCell className="text-sm text-gray-600">
                       {new Date(loja.created_at).toLocaleDateString('pt-BR')}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end space-x-2">
                         <Button 
-                          variant="ghost" 
+                          variant="ghost"
                           size="sm"
                           onClick={() => navigate(`/lojas/${loja.id}`)}
-                          className="text-blue-600 hover:text-blue-700"
+                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                         >
                           <Eye className="w-4 h-4" />
                         </Button>
                         <Dialog>
                           <DialogTrigger asChild>
-                            <Button variant="ghost" size="sm" onClick={() => setEditingLoja({
+                            <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-700 hover:bg-gray-50" onClick={() => setEditingLoja({
                               ...loja,
                               nome: loja.name,
                               endereco: loja.address,
@@ -351,7 +308,7 @@ export default function LojasPage() {
                         <Button 
                           variant="ghost" 
                           size="sm" 
-                          className="text-destructive hover:text-destructive"
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
                           onClick={() => handleDeleteLoja(loja.id)}
                         >
                           <Trash2 className="w-4 h-4" />
@@ -362,7 +319,7 @@ export default function LojasPage() {
                 ))}
                 {filteredLojas.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={7} className="text-center py-8 text-gray-500">
                       Nenhuma loja encontrada
                     </TableCell>
                   </TableRow>
