@@ -21,6 +21,10 @@ import { NovaOS } from "./pages/suporte/NovaOS";
 import { ClientesSuporte } from "./pages/suporte/ClientesSuporte";
 import { PecasSuporte } from "./pages/suporte/PecasSuporte";
 import { RelatoriosSuporte } from "./pages/suporte/RelatoriosSuporte";
+import { TicketsPage } from "./pages/suporte/TicketsPage";
+import { KnowledgeBasePage } from "./pages/suporte/KnowledgeBasePage";
+import { LiveChatPage } from "./pages/suporte/LiveChatPage";
+import { SupportMetricsPage } from "./pages/suporte/SupportMetricsPage";
 import { AuthProvider } from "./contexts/AuthContext";
 import { AdminProvider } from "./contexts/AdminContext";
 import { AuthPage } from "./pages/auth/AuthPage";
@@ -61,6 +65,10 @@ const App = () => (
               <Route path="/suporte/clientes" element={<MaxtonLayout><ClientesSuporte /></MaxtonLayout>} />
               <Route path="/suporte/pecas" element={<MaxtonLayout><PecasSuporte /></MaxtonLayout>} />
               <Route path="/suporte/relatorios" element={<MaxtonLayout><RelatoriosSuporte /></MaxtonLayout>} />
+              <Route path="/suporte/tickets" element={<MaxtonLayout><TicketsPage /></MaxtonLayout>} />
+              <Route path="/suporte/base-conhecimento" element={<MaxtonLayout><KnowledgeBasePage /></MaxtonLayout>} />
+              <Route path="/suporte/chat" element={<MaxtonLayout><LiveChatPage /></MaxtonLayout>} />
+              <Route path="/suporte/metricas" element={<MaxtonLayout><SupportMetricsPage /></MaxtonLayout>} />
               <Route path="/relatorios/financeiro" element={<MaxtonLayout><div>Relatório Financeiro</div></MaxtonLayout>} />
               <Route path="/relatorios/vendas" element={<MaxtonLayout><div>Relatório de Vendas</div></MaxtonLayout>} />
               <Route path="/relatorios/produtos" element={<MaxtonLayout><div>Relatório de Produtos</div></MaxtonLayout>} />

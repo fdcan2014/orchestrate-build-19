@@ -167,6 +167,91 @@ All colors MUST be HSL. Beautiful gradients and professional styling.
   .animate-fade-in {
     animation: fade-in 0.5s ease-out;
   }
+  
+  /* Maxton Design System Classes */
+  .maxton-card {
+    @apply bg-white border border-gray-200 shadow-sm rounded-2xl transition-all duration-300 hover:shadow-lg;
+  }
+  
+  .maxton-button-primary {
+    @apply bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md rounded-xl transition-all duration-200;
+  }
+  
+  .maxton-input {
+    @apply border-gray-300 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl transition-all duration-200;
+  }
+  
+  .maxton-badge-success {
+    @apply bg-green-100 text-green-800 border-green-200;
+  }
+  
+  .maxton-badge-warning {
+    @apply bg-yellow-100 text-yellow-800 border-yellow-200;
+  }
+  
+  .maxton-heading-1 {
+    @apply text-3xl font-bold text-gray-900 tracking-tight;
+  }
+  
+  .maxton-heading-2 {
+    @apply text-2xl font-semibold text-gray-900;
+  }
+  
+  .maxton-heading-3 {
+    @apply text-lg font-semibold text-gray-900;
+  }
+  
+  .maxton-text-body {
+    @apply text-gray-600 leading-relaxed;
+  }
+  
+  .maxton-slide-up {
+    animation: slide-up 0.4s ease-out;
+  }
+  
+  .maxton-fade-in {
+    animation: fade-in 0.6s ease-out;
+  }
+  
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Chat animations */
+  .message-enter {
+    animation: message-slide-in 0.3s ease-out;
+  }
+  
+  @keyframes message-slide-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  
+  /* Glow effects for premium feel */
+  .shadow-glow {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  }
+  
+  .shadow-glow-green {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+  }
+  
+  .shadow-glow-purple {
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+  }
 }
 
 @layer base {
