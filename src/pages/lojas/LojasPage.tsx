@@ -1,13 +1,13 @@
-import { useState } from "react";
-import { Plus, Search, Edit, Trash2, MapPin, Phone, Mail, Users, TrendingUp, Award, Eye } from "lucide-react";
-import { Store as StoreIcon } from "lucide-react";
+import React, { useState } from "react";
+import { Plus, Search, Edit, Trash2, MapPin, Phone, Mail, Eye, Store as StoreIcon, ChevronDown, ChevronUp, Award, Activity, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import DownloadIcon from "@/components/icons/DownloadIcon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import LojaForm from "@/components/forms/LojaForm";
 import BulkActions from "@/components/advanced/BulkActions";
@@ -17,318 +17,445 @@ import { MaxtonCard } from "@/components/maxton/MaxtonCard";
 import { useStores, type Store } from "@/hooks/useStores";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// Using data from Supabase hook now
+// Estilos personalizados baseados no template Maxton - Melhorado
+const maxtonStyles = {
+  // Melhorias para a tabela
+  tableRow: 'group hover:bg-muted/50 transition-all duration-300 border-b last:border-0',
+  // Botões de ação com efeitos de hover mais elegantes e ícones menores
+  actionButton: 'h-8 w-8 rounded-lg transition-all duration-300 hover:scale-105 shadow-sm',
+  // Cards de estatísticas com design similar ao Maxton
+  statCard: 'relative p-6 rounded-xl border shadow-md transition-all duration-300 hover:shadow-lg overflow-hidden bg-slate-900/50 backdrop-blur-sm',
+  statCardIcon: 'absolute -right-6 -top-6 h-24 w-24 rounded-full opacity-10',
+  // Badges com cores mais vibrantes
+  badgeActive: 'bg-emerald-500 text-white hover:bg-emerald-600 font-medium px-2.5 py-0.5 rounded-full',
+  badgeInactive: 'bg-slate-400 text-white hover:bg-slate-500 font-medium px-2.5 py-0.5 rounded-full',
+  // Botões principais com sombra e efeito de hover
+  primaryButton: 'relative group overflow-hidden',
+  primaryButtonEffect: 'absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/10 -translate-x-full group-hover:translate-x-full transition-transform duration-500'
+};
 
 const filterFields = [
-  { key: "status", label: "Status", type: "select" as const, options: [
-    { value: "active", label: "Ativa" },
-    { value: "inactive", label: "Inativa" }
-  ]},
+  { name: "name", label: "Nome", type: "text" },
+  { name: "status", label: "Status", type: "select", options: ["ativo", "inativo"] },
+  { name: "createdAt", label: "Data de Criação", type: "date" },
 ];
 
-export default function LojasPage() {
+const bulkActions = [
+  { name: "delete", label: "Excluir Selecionadas", icon: <Trash2 className="h-4 w-4" /> },
+  { name: "activate", label: "Ativar Selecionadas" },
+  { name: "deactivate", label: "Desativar Selecionadas" },
+];
+
+const LojasPage: React.FC = () => {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState("");
+  const { createStore, deleteStore, updateStore, stores, loading } = useStores();
+  
+  const [search, setSearch] = useState("");
   const [selectedLojas, setSelectedLojas] = useState<string[]>([]);
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
   const [editingLoja, setEditingLoja] = useState<Store | null>(null);
-  const [filters, setFilters] = useState<Record<string, any>>({});
-  const { stores, loading, createStore, updateStore, deleteStore } = useStores();
+  const [filters, setFilters] = useState<Record<string, string>>({});
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+
+  const handleCreateStore = (data: Omit<Store, "id" | "createdAt">) => {
+    createStore(data);
+    setIsFormDialogOpen(false);
+    setEditingLoja(null);
+  };
+
+  const handleUpdateStore = (data: Omit<Store, "createdAt">) => {
+    updateStore(data);
+    setIsFormDialogOpen(false);
+    setEditingLoja(null);
+  };
+
+  const handleDeleteStores = (ids: string[]) => {
+    ids.forEach(id => deleteStore(id));
+    setSelectedLojas([]);
+  };
+
+  const handleSelectAll = () => {
+    if (selectedLojas.length === filteredLojas.length) {
+      setSelectedLojas([]);
+    } else {
+      setSelectedLojas(filteredLojas.map(loja => loja.id));
+    }
+  };
 
   const filteredLojas = stores.filter(loja => {
-    const matchesSearch = loja.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      loja.address.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = loja.name.toLowerCase().includes(search.toLowerCase()) ||
+                         loja.address.toLowerCase().includes(search.toLowerCase()) ||
+                         loja.phone.includes(search);
     
     const matchesFilters = Object.entries(filters).every(([key, value]) => {
       if (!value) return true;
-      
       switch (key) {
+        case "name":
+          return loja.name.toLowerCase().includes(value.toLowerCase());
         case "status":
           return loja.status === value;
+        case "createdAt":
+          return loja.createdAt.startsWith(value);
         default:
           return true;
       }
     });
-
+    
     return matchesSearch && matchesFilters;
   });
 
-  const handleSelectAll = (selected: boolean) => {
-    setSelectedLojas(selected ? filteredLojas.map(loja => loja.id) : []);
-  };
-
-  const handleSelectLoja = (lojaId: string, selected: boolean) => {
-    setSelectedLojas(prev => 
-      selected 
-        ? [...prev, lojaId]
-        : prev.filter(id => id !== lojaId)
-    );
-  };
-
-  const handleBulkAction = (action: string, items: string[]) => {
-    console.log(`${action} aplicado a ${items.length} loja(s)`);
-    setSelectedLojas([]);
-  };
-
-  const handleCreateLoja = async (data: any) => {
-    const storeData = {
-      name: data.nome,
-      address: data.endereco,
-      phone: data.telefone,
-      email: data.email,
-      status: data.status === 'Ativa' ? 'active' as const : 'inactive' as const,
-      description: data.descricao,
-    };
-
-    const success = await createStore(storeData);
-    if (success) {
-      setIsCreateOpen(false);
-    }
-  };
-
-  const handleEditLoja = async (data: any) => {
-    if (!editingLoja) return;
-
-    const storeData = {
-      name: data.nome,
-      address: data.endereco,
-      phone: data.telefone,
-      email: data.email,
-      status: data.status === 'Ativa' ? 'active' as const : 'inactive' as const,
-      description: data.descricao,
-    };
-
-    const success = await updateStore(editingLoja.id, storeData);
-    if (success) {
-      setEditingLoja(null);
-    }
-  };
-
-  const handleDeleteLoja = async (lojaId: string) => {
-    await deleteStore(lojaId);
-  };
-
   return (
-    <div className="space-y-6">
-      <MaxtonPageHeader
-        title="Gestão de Lojas"
-        subtitle="Gerencie todas as lojas da sua rede"
-        breadcrumbs={[
-          { label: "Lojas" }
-        ]}
-        actions={
-          <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-            <DialogTrigger asChild>
-              <Button className="maxton-button-primary">
-                <Plus className="w-4 h-4 mr-2" />
-                Nova Loja
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Criar Nova Loja</DialogTitle>
-              </DialogHeader>
-              <LojaForm 
-                onSubmit={handleCreateLoja}
-                onCancel={() => setIsCreateOpen(false)}
-              />
-            </DialogContent>
-          </Dialog>
-        }
-      />
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <MaxtonCard
-          title="Total de Lojas"
-          value={loading ? "..." : stores.length.toString()}
-          change={loading ? "" : `${stores.filter(l => l.status === "active").length} ativas, ${stores.filter(l => l.status === "inactive").length} inativas`}
-          icon={<StoreIcon className="h-5 w-5" />}
-          variant="gradient"
-        />
-        
-        <MaxtonCard
-          title="Lojas Ativas"
-          value={loading ? "..." : stores.filter(l => l.status === "active").length.toString()}
-          change="Em funcionamento"
-          icon={<TrendingUp className="h-5 w-5" />}
-          variant="gradient"
+    <div className="min-h-screen w-full p-4 sm:p-6 bg-background">
+      <div className="max-w-7xl mx-auto w-full">
+        <MaxtonPageHeader 
+          title="Lojas"
+          description="Gerenciar todas as lojas do sistema"
+          actions={
+            <Button 
+              onClick={() => {
+                setEditingLoja(null);
+                setIsFormDialogOpen(true);
+              }}
+              className={`gap-2 transition-all duration-300 hover:shadow-md ${maxtonStyles.primaryButton}`}
+            >
+              <Plus className="h-4 w-4" />
+              Nova Loja
+              <span className={maxtonStyles.primaryButtonEffect}></span>
+            </Button>
+          }
         />
 
-        <MaxtonCard
-          title="Criadas Hoje"
-          value={loading ? "..." : stores.filter(l => new Date(l.created_at).toDateString() === new Date().toDateString()).length.toString()}
-          change="Novas lojas hoje"
-          icon={<Users className="h-5 w-5" />}
-          variant="gradient"
-        />
-
-        <MaxtonCard
-          title="Última Criada"
-          value={loading ? "..." : (stores.length > 0 ? stores[0]?.name : 'Nenhuma')}
-          change="Mais recente"
-          icon={<Award className="h-5 w-5" />}
-          variant="gradient"
-        />
-      </div>
-
-      <AdvancedFilters 
-        fields={filterFields}
-        onFiltersChange={setFilters}
-      />
-
-      <div className="flex items-center space-x-4">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-          <Input
-            placeholder="Buscar lojas..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 maxton-input"
-          />
-        </div>
-      </div>
-
-      <Card className="maxton-card">
-        <CardHeader>
-          <CardTitle className="maxton-heading-2">Lista de Lojas ({filteredLojas.length})</CardTitle>
-          <CardDescription className="maxton-text-body">Visualize e gerencie todas as lojas da sua rede</CardDescription>
-        </CardHeader>
-        
-        <BulkActions
-          selectedItems={selectedLojas}
-          totalItems={filteredLojas.length}
-          onSelectAll={handleSelectAll}
-          onBulkAction={handleBulkAction}
-          actions={{ export: true, delete: true, edit: true, archive: true }}
-        />
-
-        <CardContent className="p-0">
-          {loading ? (
-            <div className="p-6 space-y-4">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="flex items-center space-x-4">
-                  <Skeleton className="h-4 w-4" />
-                  <Skeleton className="h-4 w-32" />
-                  <Skeleton className="h-4 w-48" />
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="h-4 w-16" />
+        {/* Layout com design similar ao Maxton */}
+        <div className="grid gap-6 mt-6 w-full grid-cols-1 lg:grid-cols-3">
+          {/* Coluna principal com a tabela de lojas */}
+          <div className="lg:col-span-2">
+            <MaxtonCard className="h-full border rounded-xl shadow-md transition-all duration-300 hover:shadow-lg">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <div>
+                  <CardTitle className="text-2xl font-bold text-slate-800 dark:text-slate-100">Listagem de Lojas</CardTitle>
+                  <CardDescription className="text-slate-500 dark:text-slate-400">Gerencie e visualize todas as lojas</CardDescription>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-12">
-                    <Checkbox
-                      checked={selectedLojas.length === filteredLojas.length && filteredLojas.length > 0}
-                      onCheckedChange={handleSelectAll}
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="gap-1 transition-all duration-300 hover:bg-primary/10 rounded-lg"
+                  >
+                    <DownloadIcon className="h-3.5 w-3.5" />
+                    Exportar
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+                    className="transition-all duration-300 hover:bg-primary/10 rounded-lg"
+                  >
+                    Filtrar
+                    <ChevronDown className={`ml-1 h-3.5 w-3.5 transition-transform duration-300 ${isFiltersOpen ? 'rotate-180' : ''}`} />
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="h-full flex flex-col">
+                {isFiltersOpen && (
+                  <div className="mb-4 p-4 border rounded-lg bg-background shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
+                    <AdvancedFilters 
+                      fields={filterFields}
+                      filters={filters}
+                      setFilters={setFilters}
                     />
-                  </TableHead>
-                  <TableHead className="text-gray-700 font-semibold">Loja</TableHead>
-                  <TableHead className="text-gray-700 font-semibold">Endereço</TableHead>
-                  <TableHead className="text-gray-700 font-semibold">Contato</TableHead>
-                  <TableHead className="text-gray-700 font-semibold">Status</TableHead>
-                  <TableHead className="text-gray-700 font-semibold">Criada em</TableHead>
-                  <TableHead className="text-right text-gray-700 font-semibold">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredLojas.map((loja) => (
-                  <TableRow key={loja.id} className={`hover:bg-gray-50/50 transition-colors ${selectedLojas.includes(loja.id) ? "bg-blue-50/50" : ""}`}>
-                    <TableCell>
-                      <Checkbox
-                        checked={selectedLojas.includes(loja.id)}
-                        onCheckedChange={(checked) => handleSelectLoja(loja.id, checked as boolean)}
-                      />
-                    </TableCell>
-                    <TableCell className="font-medium text-gray-900">{loja.name}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center text-sm text-gray-600">
-                        <MapPin className="w-4 h-4 mr-1" />
-                        {loja.address}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="space-y-1">
-                        <div className="flex items-center text-sm text-gray-700">
-                          <Phone className="w-4 h-4 mr-1" />
-                          {loja.phone}
-                        </div>
-                        <div className="flex items-center text-sm text-gray-500">
-                          <Mail className="w-4 h-4 mr-1" />
-                          {loja.email}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={loja.status === "active" ? "maxton-badge-success" : "maxton-badge-warning"}>
-                        {loja.status === "active" ? "Ativa" : "Inativa"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-sm text-gray-600">
-                      {new Date(loja.created_at).toLocaleDateString('pt-BR')}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end space-x-2">
-                        <Button 
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => navigate(`/lojas/${loja.id}`)}
-                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-700 hover:bg-gray-50" onClick={() => setEditingLoja({
-                              ...loja,
-                              nome: loja.name,
-                              endereco: loja.address,
-                              telefone: loja.phone,
-                              status: loja.status === "active" ? "Ativa" : "Inativa",
-                              descricao: loja.description
-                            } as any)}>
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                          </DialogTrigger>
-                          {editingLoja && (
-                            <DialogContent className="max-w-2xl">
-                              <DialogHeader>
-                                <DialogTitle>Editar Loja</DialogTitle>
-                              </DialogHeader>
-                              <LojaForm 
-                                loja={editingLoja as any}
-                                onSubmit={handleEditLoja}
-                                onCancel={() => setEditingLoja(null)}
-                              />
-                            </DialogContent>
-                          )}
-                        </Dialog>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                          onClick={() => handleDeleteLoja(loja.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {filteredLojas.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-gray-500">
-                      Nenhuma loja encontrada
-                    </TableCell>
-                  </TableRow>
+                  </div>
                 )}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+              
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+                  <div className="relative w-full max-w-sm sm:max-w-md">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input 
+                      type="text" 
+                      placeholder="Buscar loja..." 
+                      className="pl-9 pr-4 py-2 w-full rounded-lg border border-slate-300 dark:border-slate-600 transition-all duration-300 focus:ring-2 focus:ring-primary/30 focus:border-primary shadow-sm"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                    />
+                  </div>
+                  
+                  {selectedLojas.length > 0 && (
+                    <BulkActions 
+                      selectedCount={selectedLojas.length}
+                      actions={bulkActions}
+                      onAction={(action) => {
+                        if (action === "delete") {
+                          handleDeleteStores(selectedLojas);
+                        }
+                        // Implemente outras ações de bulk aqui
+                      }}
+                    />
+                  )}
+                </div>
+
+                {/* Tabela com design aprimorado */}
+                <div className="overflow-x-auto rounded-lg border border-slate-800 shadow-sm flex-grow">
+                  <Table className="min-w-full border-collapse w-full">
+                    <TableHeader className="bg-slate-900/50 backdrop-blur-sm">
+                      <TableRow>
+                        <TableHead className="w-[40px]">
+                          <Checkbox 
+                            checked={selectedLojas.length > 0 && selectedLojas.length === filteredLojas.length}
+                            onCheckedChange={handleSelectAll}
+                            aria-label="Selecionar todas as lojas"
+                          />
+                        </TableHead>
+                        <TableHead className="sm:w-[200px] font-semibold text-slate-700 dark:text-slate-300">Nome</TableHead>
+                        <TableHead className="hidden md:table-cell font-semibold text-slate-700 dark:text-slate-300">Endereço</TableHead>
+                        <TableHead className="hidden sm:table-cell font-semibold text-slate-700 dark:text-slate-300">Telefone</TableHead>
+                        <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Status</TableHead>
+                        <TableHead className="text-right font-semibold text-slate-700 dark:text-slate-300">Ações</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {loading ? (
+                        // Skeleton loading state com design melhorado
+                        Array.from({ length: 5 }).map((_, index) => (
+                          <TableRow key={`skeleton-${index}`} className="animate-pulse">
+                            <TableCell><Skeleton className="h-4 w-4 rounded" /></TableCell>
+                            <TableCell><Skeleton className="h-5 w-[150px] rounded" /></TableCell>
+                            <TableCell><Skeleton className="h-5 w-[200px] rounded" /></TableCell>
+                            <TableCell><Skeleton className="h-5 w-[120px] rounded" /></TableCell>
+                            <TableCell><Skeleton className="h-6 w-[80px] rounded-full" /></TableCell>
+                            <TableCell className="text-right">
+                              <div className="inline-flex gap-2">
+                                <Skeleton className="h-8 w-8 rounded-lg" />
+                                <Skeleton className="h-8 w-8 rounded-lg" />
+                                <Skeleton className="h-8 w-8 rounded-lg" />
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : filteredLojas.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={6} className="h-32 text-center">
+                            <div className="flex flex-col items-center justify-center gap-3 text-muted-foreground">
+                              <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-2">
+                                <StoreIcon className="h-8 w-8 text-primary" />
+                              </div>
+                              <p className="text-lg font-medium">Nenhuma loja encontrada</p>
+                              <Button 
+                                variant="default" 
+                                className={`mt-2 ${maxtonStyles.primaryButton}`}
+                                onClick={() => {
+                                  setEditingLoja(null);
+                                  setIsFormDialogOpen(true);
+                                }}
+                              >
+                                Criar primeira loja
+                                <span className={maxtonStyles.primaryButtonEffect}></span>
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                          filteredLojas.map((loja) => (
+                            <TableRow 
+                              key={loja.id} 
+                              className={maxtonStyles.tableRow}
+                            >
+                              <TableCell>
+                                <Checkbox 
+                                  checked={selectedLojas.includes(loja.id)}
+                                  onCheckedChange={(checked) => {
+                                    if (checked) {
+                                      setSelectedLojas([...selectedLojas, loja.id]);
+                                    } else {
+                                      setSelectedLojas(selectedLojas.filter(id => id !== loja.id));
+                                    }
+                                  }}
+                                  aria-label={`Selecionar loja ${loja.name}`}
+                                />
+                              </TableCell>
+                              <TableCell className="font-medium text-slate-800 dark:text-slate-200">
+                                {loja.name}
+                                {/* Exibir endereço e telefone em telas pequenas */}
+                                <div className="flex flex-col mt-1 space-y-1 text-xs text-muted-foreground md:hidden">
+                                  <div className="flex items-center gap-1">
+                                    <MapPin className="h-3 w-3" />
+                                    <span className="truncate">{loja.address}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <Phone className="h-3 w-3" />
+                                    <span>{loja.phone}</span>
+                                  </div>
+                                </div>
+                              </TableCell>
+                              {/* Endereço e telefone só visíveis em telas maiores */}
+                              <TableCell className="hidden md:table-cell max-w-[250px] truncate">
+                                <div className="flex items-center gap-1 text-sm">
+                                  <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
+                                  <span>{loja.address}</span>
+                                </div>
+                              </TableCell>
+                              <TableCell className="hidden sm:table-cell">
+                                <div className="flex items-center gap-1 text-sm">
+                                  <Phone className="h-3.5 w-3.5 text-muted-foreground" />
+                                  <span>{loja.phone}</span>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                {/* Badges com design similar ao Maxton */}
+                                <Badge 
+                                  className={loja.status === "ativo" ? maxtonStyles.badgeActive : maxtonStyles.badgeInactive}
+                                >
+                                  {loja.status.charAt(0).toUpperCase() + loja.status.slice(1)}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-right">
+                                {/* Botões de ação com ícones menores */}
+                                <div className="flex items-center gap-1 justify-end transition-all duration-300">
+                                  <Button 
+                                    variant="default" 
+                                    size="icon" 
+                                    className={`${maxtonStyles.actionButton} bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 border-none`}
+                                    onClick={() => navigate(`/lojas/${loja.id}`)}
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                    <span className="sr-only">Visualizar</span>
+                                  </Button>
+                                  <Button 
+                                    variant="default" 
+                                    size="icon" 
+                                    className={`${maxtonStyles.actionButton} bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 border-none`}
+                                    onClick={() => {
+                                      setEditingLoja(loja);
+                                      setIsFormDialogOpen(true);
+                                    }}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                    <span className="sr-only">Editar</span>
+                                  </Button>
+                                  <Button 
+                                    variant="default" 
+                                    size="icon" 
+                                    className={`${maxtonStyles.actionButton} bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50 border-none`}
+                                    onClick={() => deleteStore(loja.id)}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                    <span className="sr-only">Excluir</span>
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </MaxtonCard>
+          </div>
+
+          {/* Coluna de estatísticas com design similar ao Maxton */}
+          <div>
+            <MaxtonCard className="h-full border rounded-xl shadow-md transition-all duration-300 hover:shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-xl font-bold text-slate-800 dark:text-slate-100">Estatísticas</CardTitle>
+                <CardDescription className="text-slate-500 dark:text-slate-400">Visão geral das lojas</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {/* Cards de estatísticas com design similar ao Maxton */}
+                <div className="space-y-4">
+                  {/* Total de Lojas */}
+                  <div className={`transition-all duration-300 hover:shadow-lg rounded-xl overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700/50`}>
+                    <div className="p-5">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className="p-3 rounded-lg bg-primary/20 text-primary">
+                            <Award className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <p className="text-sm text-slate-400">Total de Lojas</p>
+                            <p className="text-3xl font-bold text-white mt-1">{stores.length}</p>
+                          </div>
+                        </div>
+                        <div className="p-2 rounded-full bg-slate-700/50">
+                          <ChevronUp className="h-4 w-4 text-green-400" />
+                        </div>
+                      </div>
+                      <div className="mt-4 flex items-center text-xs text-slate-400">
+                        <span className="text-green-400 font-medium mr-2">+2.5%</span>
+                        <span>Mês anterior</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Lojas Ativas */}
+                  <div className={`transition-all duration-300 hover:shadow-lg rounded-xl overflow-hidden bg-gradient-to-br from-emerald-900/30 to-slate-900 border border-emerald-800/30`}>
+                    <div className="p-5">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className="p-3 rounded-lg bg-emerald-500/20 text-emerald-500">
+                            <Activity className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <p className="text-sm text-slate-400">Lojas Ativas</p>
+                            <p className="text-3xl font-bold text-emerald-500 mt-1">{stores.filter(loja => loja.status === "ativo").length}</p>
+                          </div>
+                        </div>
+                        <div className="p-2 rounded-full bg-emerald-800/30">
+                          <ChevronUp className="h-4 w-4 text-emerald-400" />
+                        </div>
+                      </div>
+                      <div className="mt-4 flex items-center text-xs text-slate-400">
+                        <span className="text-emerald-400 font-medium mr-2">+5.2%</span>
+                        <span>Mês anterior</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Lojas Inativas */}
+                  <div className={`transition-all duration-300 hover:shadow-lg rounded-xl overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700/50`}>
+                    <div className="p-5">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className="p-3 rounded-lg bg-slate-600/30 text-slate-400">
+                            <AlertTriangle className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <p className="text-sm text-slate-400">Lojas Inativas</p>
+                            <p className="text-3xl font-bold text-slate-400 mt-1">{stores.filter(loja => loja.status === "inativo").length}</p>
+                          </div>
+                        </div>
+                        <div className="p-2 rounded-full bg-slate-700/50">
+                          <ChevronDown className="h-4 w-4 text-red-400" />
+                        </div>
+                      </div>
+                      <div className="mt-4 flex items-center text-xs text-slate-400">
+                        <span className="text-red-400 font-medium mr-2">-1.8%</span>
+                        <span>Mês anterior</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </MaxtonCard>
+          </div>
+        </div>
+
+        <Dialog open={isFormDialogOpen} onOpenChange={setIsFormDialogOpen}>
+          <DialogContent className="sm:max-w-[600px] rounded-xl border shadow-xl">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-bold text-slate-800 dark:text-slate-100">{editingLoja ? "Editar Loja" : "Nova Loja"}</DialogTitle>
+            </DialogHeader>
+            <LojaForm 
+              loja={editingLoja}
+              onSubmit={editingLoja ? handleUpdateStore : handleCreateStore}
+              onCancel={() => {
+                setIsFormDialogOpen(false);
+                setEditingLoja(null);
+              }}
+            />
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
-}
+};
+
+export default LojasPage;
